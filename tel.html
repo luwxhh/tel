@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="keywords" content="一键拨号,手机号码生成微信二维码,电话号码生成微信二维码,扫二维码直接拨打电话,扫描二维码自动拨号">
+    <title>二维码挪车</title>
+</head>
+
+<body style="zoom: 1;">
+    <div style="text-align: center;margin-top:50px">
+        <h1>${{ secrets.tel }}</h1>
+        <a href="tel:${{ secrets.tel }}" class="btn" style="font-size:35px;margin-top:20px;">一键拨号</a>
+    </div>
+    <div style="text-align: center;margin-top:50px">
+        <p>手机扫一扫,即可一键拨打电话</p>
+        <p>免去自己输入号码还怕打错电话的麻烦</p>
+        <p><a href="">点这里！制作自己的电话号码二维码</a></p>
+    </div>
+    <style>
+        .btn {
+            display: inline-block;
+            margin-bottom: 0;
+            font-weight: 400;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            -ms-touch-action: manipulation;
+            touch-action: manipulation;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            background-image: none;
+            border: 1px solid transparent;
+            color: #fff;
+            background-color: #5cb85c;
+            border-color: #4cae4c;
+            padding: 10px 16px;
+            line-height: 1.3333333;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+    </style>
+    <script>
+        $(document).ready(function ($) {
+            // 微信分享
+            $.post('/get_wx_config/', {
+                'share_url': window.location.href
+            }, function (data) {
+                wx.config({
+                    debug: false,
+                    appId: data.app_id,
+                    timestamp: data.timestamp,
+                    nonceStr: data.nonceStr,
+                    signature: data.signature,
+                    jsApiList: [
+                        'updateAppMessageShareData',
+                        'updateTimelineShareData',
+                        'onMenuShareAppMessage',
+                        'onMenuShareTimeline',
+                        'previewImage',
+                    ]
+                });
+
+                var doc_title = $('title').text();
+                wx.ready(function () {
+                    wx.onMenuShareAppMessage({
+                        title: doc_title,
+                        desc: '输入手机号即可生成二维码,扫码就可拨号,再也不用自己输入电话号码了,避免打错号码的尴尬.',
+                        link: data.share_url,
+                        imgUrl: data.share_img_url,
+                        success: function () {
+                            console.log('好友分享设置成功')
+                        }
+                    });
+
+                    wx.updateTimelineShareData({
+                        title: doc_title,
+                        link: data.share_url,
+                        imgUrl: data.share_img_url,
+                        success: function () {
+                            console.log('朋友圈分享设置成功')
+                        }
+                    });
+                });
+            })
+        });
+
+    </script>
+
+</body>
+
+</html>
