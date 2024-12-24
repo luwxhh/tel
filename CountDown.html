@@ -14,7 +14,6 @@
             background-color: #001f3f; /* 深蓝色背景 */
             color: white; /* 字体颜色为白色 */
             font-family: Arial, sans-serif;
-            position: relative;
             margin: 0; /* 去掉默认边距 */
         }
         #countdown {
@@ -37,10 +36,10 @@
 
 <div id="countdown">05:00</div>
 
-<button id="increase" class="button" onclick="changeDefaultTime(5)">增加时间</button>
-<button id="decrease" class="button" onclick="changeDefaultTime(-5)">减少时间</button>
+<button id="increase" class="button" onclick="changeTime(5)">增加时间</button>
+<button id="decrease" class="button" onclick="changeTime(-5)">减少时间</button>
 <button id="reset" class="button" onclick="resetTimer()">重置倒计时</button>
-<button id="startStop" class="button" onclick="startStopTimer()">开始/停止计时</button>
+<button id="startStop" class="button" onclick="toggleTimer()">开始/停止计时</button>
 
 <script>
     let currentDefaultTime = 300; // 默认时间为5分钟（300秒）
@@ -49,44 +48,67 @@
     let isRunning = false;
 
     function updateDisplay() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        document.getElementById('countdown').textContent = 
-            String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+        const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+        const seconds = String(timeLeft % 60).padStart(2, '0');
+        document.getElementById('countdown').textContent = `${minutes}:${seconds}`;
     }
 
-    function changeDefaultTime(amount) {
-        currentDefaultTime += amount * 60; // 以秒为单位增加或减少
-        if (currentDefaultTime < 0) currentDefaultTime = 0; // 不允许负时间
-        timeLeft = currentDefaultTime; // 更新当前时间为新的默认时间
-        updateDisplay();
+    function changeTime(amount) {
+        currentDefaultTime = Math.max(0, currentDefaultTime + amount * 60); // 以秒为单位增加或减少，确保不为负
+        resetTimer(); // 更新当前时间为新的默认时间
     }
 
     function resetTimer() {
         timeLeft = currentDefaultTime; // 重置为当前默认时间
         updateDisplay();
-        if (isRunning) {
-            clearInterval(timerId);
-            isRunning = false;
-        }
+        stopTimer();
     }
 
-    function startStopTimer() {
-        if (isRunning) {
-            clearInterval(timerId);
-        } else {
-            timerId = setInterval(() => {
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    updateDisplay();
-                } else {
-                    clearInterval(timerId);
-                    isRunning = false;
-                }
-            }, 1000);
-        }
-        isRunning = !isRunning;
+    function toggleTimer() {
+        isRunning ? stopTimer() : startTimer();
     }
+
+    function startTimer() {
+        isRunning = true;
+        timerId = setInterval(() => {
+            if (timeLeft > 0) {
+                timeLeft--;
+                updateDisplay();
+            } else {
+                stopTimer();
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerId);
+        isRunning = false;
+    }
+
+    // 处理键盘事件
+    document.addEventListener('keydown', (event) => {
+        switch (event.key) {
+            case 'ArrowUp':
+                changeTime(5); // 增加5分钟
+                break;
+            case 'ArrowDown':
+                changeTime(-5); // 减少5分钟
+                break;
+            case 'ArrowLeft':
+                changeTime(-1); // 减少1分钟
+                break;
+            case 'ArrowRight':
+                changeTime(1); // 增加1分钟
+                break;
+            case ' ':
+                event.preventDefault(); // 阻止默认行为
+                toggleTimer(); // 空格键开始/停止计时
+                break;
+            case 'r':
+                resetTimer(); // r键重置时间
+                break;
+        }
+    });
 
     // 初始化显示
     updateDisplay();
