@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时网页</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #001f3f; /* 深蓝色背景 */
+            color: white; /* 字体颜色为白色 */
+            font-family: Arial, sans-serif;
+            position: relative;
+            margin: 0; /* 去掉默认边距 */
+        }
+        #countdown {
+            font-size: 20vw; /* 适应屏幕宽度 */
+            margin-bottom: 20px;
+        }
+        .button {
+            width: 50%; /* 按钮宽度占屏幕的一半 */
+            height: 50%; /* 按钮高度占屏幕的一半 */
+            opacity: 0; /* 隐形按钮 */
+            position: absolute;
+        }
+        #increase { top: 0; left: 0; } /* 左上角 */
+        #decrease { bottom: 0; left: 0; } /* 左下角 */
+        #reset { top: 0; right: 0; } /* 右上角 */
+        #startStop { bottom: 0; right: 0; } /* 右下角 */
+    </style>
+</head>
+<body>
+
+<div id="countdown">05:00</div>
+
+<button id="increase" class="button" onclick="changeDefaultTime(5)">增加时间</button>
+<button id="decrease" class="button" onclick="changeDefaultTime(-5)">减少时间</button>
+<button id="reset" class="button" onclick="resetTimer()">重置倒计时</button>
+<button id="startStop" class="button" onclick="startStopTimer()">开始/停止计时</button>
+
+<script>
+    let currentDefaultTime = 300; // 默认时间为5分钟（300秒）
+    let timeLeft = currentDefaultTime; // 当前剩余时间
+    let timerId;
+    let isRunning = false;
+
+    function updateDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('countdown').textContent = 
+            String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+    }
+
+    function changeDefaultTime(amount) {
+        currentDefaultTime += amount * 60; // 以秒为单位增加或减少
+        if (currentDefaultTime < 0) currentDefaultTime = 0; // 不允许负时间
+        timeLeft = currentDefaultTime; // 更新当前时间为新的默认时间
+        updateDisplay();
+    }
+
+    function resetTimer() {
+        timeLeft = currentDefaultTime; // 重置为当前默认时间
+        updateDisplay();
+        if (isRunning) {
+            clearInterval(timerId);
+            isRunning = false;
+        }
+    }
+
+    function startStopTimer() {
+        if (isRunning) {
+            clearInterval(timerId);
+        } else {
+            timerId = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateDisplay();
+                } else {
+                    clearInterval(timerId);
+                    isRunning = false;
+                }
+            }, 1000);
+        }
+        isRunning = !isRunning;
+    }
+
+    // 初始化显示
+    updateDisplay();
+</script>
+
+</body>
+</html>
